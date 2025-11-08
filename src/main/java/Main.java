@@ -1,8 +1,8 @@
 public class Main {
     public static void main(String[] args) {
-        String token = "8228318354:AAEXnbBWbXGuRsFnRLKtsn2rlcgImgCTILM";
-        new Bot(token);
+        String token = args[0];
+        Bot.start(token);
 
-        System.out.println("Бот запущен...");
+        System.out.println("Бот запущен с токеном " + token);
     }
 }

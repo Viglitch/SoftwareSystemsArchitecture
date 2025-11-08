@@ -5,8 +5,8 @@ import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
 
 public class Bot {
-    public static void main(String[] args) {
-        TelegramBot bot = new TelegramBot("BOT_TOKEN");
+    public static void start(String botToken) {
+        TelegramBot bot = new TelegramBot(botToken);
         bot.setUpdatesListener(updates -> {
             for (Update update: updates) {
                 if (update.message() != null && update.message().text() != null) {
