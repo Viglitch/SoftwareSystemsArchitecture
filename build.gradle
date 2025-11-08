@@ -12,6 +12,7 @@ repositories {
 
 dependencies {
     testImplementation 'junit:junit:4.13.2'
+    implementation 'com.github.pengrad:java-telegram-bot-api:6.8.0'
 }
 
 application {
