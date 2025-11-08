@@ -3,6 +3,6 @@ public class Main {
         String token = args[0];
         Bot.start(token);
 
-        System.out.println("Бот запущен с токеном " + token);
+        System.out.println("Бот запущен...");
     }
 }
