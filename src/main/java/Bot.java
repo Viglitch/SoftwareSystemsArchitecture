@@ -14,15 +14,29 @@ public class Bot {
                     String messageText = update.message().text();
                     String userName = update.message().chat().firstName();
 
+                    sendMessage(bot, chatId, "Привет, " + userName + "!\n"
+                            + "Я ваш бот и я умею поздравлять с днем рождения.\n"
+                            + "Как мной пользоваться: \n"
+                            + "/newBirthday - добавить день рождения в базу\n"
+                            + "/allBirthdays - посмотреть все дни рождения в базе\n"
+                            + "/deleteBirthday - удалить день рождения из базы\n");
+
                     switch (messageText) {
-                        case "/start":
-                            sendMessage(bot, chatId, "Привет, " + userName + "! Я простой бот.");
+                        case "/newBirthday":
+                            sendMessage(bot, chatId, "Кого поздравляем? (введите имя)");
+                            String nameText = update.message().text();
+                            sendMessage(bot, chatId, "Когда поздравляем? (дата рождения вида DD.MM.YYYY)");
+                            String dateText = update.message().text();
+                            sendMessage(bot, chatId, "Поздравлю "+nameText+" в "+dateText);
                             break;
-                        case "/help":
-                            sendMessage(bot, chatId, "Доступные команды:\n/start - начать\n/help - помощь");
+                        case "/allBirthdays":
+                            sendMessage(bot, chatId, "Пока нет дней рождения");
+                            break;
+                        case "/deleteBirthday":
+                            sendMessage(bot, chatId, "Пока нет дней рождения для удаления");
                             break;
                         default:
-                            sendMessage(bot, chatId, "Вы сказали: " + messageText);
+                            sendMessage(bot, chatId, "Неизвестная команда: " + messageText);
                             break;
                     }
                 }
