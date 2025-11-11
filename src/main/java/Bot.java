@@ -12,10 +12,12 @@ public class Bot {
     private static final Map<Long, String> userStates = new HashMap<>();
     private static final Map<Long, String> tempNames = new HashMap<>();
 
-    public static void start(String botToken) {
+    public static void start(String botToken, String url, String username, String password) {
         TelegramBot bot = new TelegramBot(botToken);
         DatabaseManager dbManager = new DatabaseManager();
-        dbManager.createUsersTable();
+        dbManager.createUsersTable(url, username, password);
+
+        dbManager.createUsersTable(url, username, password);
 
         bot.setUpdatesListener(updates -> {
             for (Update update: updates) {

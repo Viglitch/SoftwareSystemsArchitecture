@@ -1,15 +1,19 @@
 import java.sql.*;
 
 public class DatabaseManager {
-    private static final String URL = "jdbc:postgresql://localhost:5432/database_name";
-    private static final String USER = "username";
-    private static final String PASSWORD = "password";
+    private static String URL;
+    private static String USER;
+    private static String PASSWORD;
 
     public Connection connect() throws SQLException {
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 
-    public void createUsersTable() {
+    public void createUsersTable(String url, String user, String password) {
+        URL = url;
+        USER = user;
+        PASSWORD = password;
+
         String sql = "CREATE TABLE IF NOT EXISTS users (" +
                 "id SERIAL PRIMARY KEY, " +
                 "chat_id BIGINT UNIQUE NOT NULL, " +
@@ -42,7 +46,6 @@ public class DatabaseManager {
         }
     }
 
-    // Пример метода для получения пользователя
     public boolean userExists(Long chatId) {
         String sql = "SELECT 1 FROM users WHERE chat_id = ?";
 
