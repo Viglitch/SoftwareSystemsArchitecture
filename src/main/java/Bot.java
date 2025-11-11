@@ -59,6 +59,15 @@ public class Bot {
                     dbManager.addUser(chatId, name, date);
                     sendMessage(bot, chatId, "Поздравлю " + name + " в " + date);
                     return;
+                    break;
+
+                case "WAITING_FOR_ID_TO_DELETE":
+                    String name = tempNames.get(chatId);
+                    String date = command;
+
+                    dbManager.addUser(chatId, name, date);
+                    sendMessage(bot, chatId, "Поздравлю " + name + " в " + date);
+                    return;
             }
         }
 
@@ -69,11 +78,14 @@ public class Bot {
                 break;
 
             case "/allBirthdays":
-                sendMessage(bot, chatId, "Пока нет дней рождения");
+                String res = dbManager.getAllUsers();
+                sendMessage(bot, chatId, res);
                 break;
 
             case "/deleteBirthday":
-                sendMessage(bot, chatId, "Пока нет дней рождения для удаления");
+                String res2del = dbManager.getAllUsers();
+                sendMessage(bot, chatId, res2del);
+                sendMessage(bot, chatId, "Напиши ID пользователя, которого мы удаляем");
                 break;
 
             default:

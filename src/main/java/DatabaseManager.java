@@ -1,4 +1,5 @@
 import java.sql.*;
+import java.text.SimpleDateFormat;
 
 public class DatabaseManager {
     private static String URL;
@@ -44,6 +45,56 @@ public class DatabaseManager {
         } catch (SQLException e) {
             System.out.println("Ошибка при добавлении пользователя: " + e.getMessage());
         }
+    }
+
+
+    public String getAllUsers() {
+        StringBuilder result = new StringBuilder();
+        String sql = "SELECT chat_id, username, birthdate, registered_at FROM users ORDER BY registered_at DESC";
+
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            result.append("📊 Список всех пользователей:\n\n");
+
+            int count = 0;
+            while (rs.next()) {
+                count++;
+                Long chatId = rs.getLong("chat_id");
+                String username = rs.getString("username");
+                String birthdate = rs.getString("birthdate");
+                Timestamp registeredAt = rs.getTimestamp("registered_at");
+
+                // Форматируем дату регистрации
+                String regDate = new SimpleDateFormat("dd.MM.yyyy HH:mm").format(registeredAt);
+
+                result.append(String.format(
+                        "👤 Пользователь #%d\n" +
+                                "🆔 ID: %d\n" +
+                                "📛 Username: @%s\n" +
+                                "🎂 День рождения: %s\n" +
+                                "📅 Зарегистрирован: %s\n\n",
+                        count,
+                        chatId,
+                        username != null ? username : "не указан",
+                        birthdate != null ? birthdate : "не указана",
+                        regDate
+                ));
+            }
+
+            if (count == 0) {
+                result.append("❌ В базе данных пока нет пользователей");
+            } else {
+                result.append("Всего пользователей: ").append(count);
+            }
+
+        } catch (SQLException e) {
+            result.setLength(0); // Очищаем StringBuilder
+            result.append("Ошибка при получении пользователей: ").append(e.getMessage());
+        }
+
+        return result.toString();
     }
 
     public boolean userExists(Long chatId) {
