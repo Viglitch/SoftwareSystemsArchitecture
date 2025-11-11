@@ -4,6 +4,7 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
 
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,6 +14,9 @@ public class Bot {
 
     public static void start(String botToken) {
         TelegramBot bot = new TelegramBot(botToken);
+        DatabaseManager dbManager = new DatabaseManager();
+        dbManager.createUsersTable();
+
         bot.setUpdatesListener(updates -> {
             for (Update update: updates) {
                 if (update.message() != null && update.message().text() != null) {
@@ -20,23 +24,22 @@ public class Bot {
                     String messageText = update.message().text();
                     String userName = update.message().chat().firstName();
 
-                    if (messageText.equals("/start")) {
-                        sendMessage(bot, chatId, "Привет, " + userName + "!\n"
+                    sendMessage(bot, chatId, "Привет, " + userName + "!\n"
                                 + "Я ваш бот и я умею поздравлять с днем рождения.\n"
                                 + "Как мной пользоваться:\n"
                                 + "/newBirthday - добавить день рождения в базу\n"
                                 + "/allBirthdays - посмотреть все дни рождения в базе\n"
                                 + "/deleteBirthday - удалить день рождения из базы\n");
-                    }
 
-                    handleCommand(bot, chatId, messageText);
+
+                    handleCommand(bot, chatId, messageText, dbManager);
                 }
             }
             return UpdatesListener.CONFIRMED_UPDATES_ALL;
         });
     }
 
-    private static void handleCommand(TelegramBot bot, Long chatId, String command) {
+    private static void handleCommand(TelegramBot bot, Long chatId, String command, DatabaseManager dbManager) {
         String userState = userStates.get(chatId);
 
         if (userState != null) {
@@ -51,10 +54,7 @@ public class Bot {
                     String name = tempNames.get(chatId);
                     String date = command;
 
-                    // Очищаем состояние
-                    userStates.remove(chatId);
-                    tempNames.remove(chatId);
-
+                    dbManager.addUser(chatId, name, date);
                     sendMessage(bot, chatId, "Поздравлю " + name + " в " + date);
                     return;
             }
