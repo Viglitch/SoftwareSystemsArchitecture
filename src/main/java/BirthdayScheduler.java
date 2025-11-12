@@ -9,9 +9,13 @@ import java.util.concurrent.TimeUnit;
 
 public class BirthdayScheduler {
     private final ScheduledExecutorService scheduler;
+    private final TelegramBot bot;
+    private final DatabaseManager database;
 
-    public BirthdayScheduler() {
+    public BirthdayScheduler(TelegramBot myBot, DatabaseManager myDatabase) {
         this.scheduler = Executors.newScheduledThreadPool(1);
+        this.bot = myBot;
+        this.database = myDatabase;
     }
 
     public void start(LocalDate date) {
@@ -42,7 +46,8 @@ public class BirthdayScheduler {
             LocalDate today = LocalDate.now();
 
             if (userBD.equals(today)) {
-                String message = "🎉 Сегодня день рождения! Поздравляем!";
+                String name = this.database.getUserByBirthday(userBD.toString());
+                String message = "🎉 Сегодня день рождения у "+ name +"! Поздравляю!";
             }
 
         } catch (Exception e) {

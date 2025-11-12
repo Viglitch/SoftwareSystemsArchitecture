@@ -1,15 +1,22 @@
+import com.pengrad.telegrambot.TelegramBot;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Birthdays {
-    static BirthdayScheduler scheduler = new BirthdayScheduler();
-    public static void initiate(String args) {
-        String res = args;
-        String text = res;
+    private BirthdayScheduler scheduler;
+    private TelegramBot bot;
+    private DatabaseManager database;
+    public void initiate(String args, TelegramBot myBot, DatabaseManager myDatabase) {
+        String text = args;
+        this.bot = myBot;
+        this.database = myDatabase;
+        this.scheduler = new BirthdayScheduler(myBot, myDatabase);
 
         List<String> birthdays1 = extractBirthdaysWithRegex(text);
         for (String bd: birthdays1){

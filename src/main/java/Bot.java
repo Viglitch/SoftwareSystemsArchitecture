@@ -18,7 +18,7 @@ public class Bot {
 
         String res = dbManager.getAllUsers();
         Birthdays bd = new Birthdays();
-        bd.initiate(res);
+        bd.initiate(res, bot, dbManager);
 
         bot.setUpdatesListener(updates -> {
             for (Update update: updates) {

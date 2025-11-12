@@ -126,6 +126,30 @@ public class DatabaseManager {
     }
 
 
+    public String getUserByBirthday(String date) {
+        ensureTableExists();
+
+        StringBuilder result = new StringBuilder();
+        String sql = "SELECT username FROM users WHERE birthdate = ?";
+
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                String username = rs.getString("username");
+                result.append(username);
+            }
+
+        } catch (SQLException e) {
+            result.setLength(0);
+            result.append("Ошибка при получении пользователей: ").append(e.getMessage());
+            e.printStackTrace();
+        }
+
+        return result.toString();
+    }
+
     private void ensureTableExists() {
         try (Connection conn = connect();
              Statement stmt = conn.createStatement()) {
