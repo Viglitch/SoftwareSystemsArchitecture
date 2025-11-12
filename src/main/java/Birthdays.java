@@ -6,6 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Birthdays {
+    static BirthdayScheduler scheduler = new BirthdayScheduler();
     public static void initiate(String args) {
         String res = args;
         String text = res;
@@ -13,6 +14,7 @@ public class Birthdays {
         List<String> birthdays1 = extractBirthdaysWithRegex(text);
         for (String bd: birthdays1){
             LocalDate date = convertToLocalDate(bd);
+            scheduler.start(date);
         }
     }
     public static List<String> extractBirthdaysWithRegex(String text) {
