@@ -32,9 +32,9 @@ public class BirthdayScheduler {
         }
 
         scheduler.scheduleAtFixedRate(() -> {
-            LocalDate today = LocalDate.now();
-            checkBirthdays(today);  // передаем параметр
-        }, initialDelay,
+                    LocalDate today = LocalDate.now();
+                    checkBirthdays(today);  // передаем параметр
+                }, initialDelay,
                 24 * 60,
                 TimeUnit.MINUTES);
 

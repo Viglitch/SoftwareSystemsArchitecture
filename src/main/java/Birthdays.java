@@ -13,7 +13,6 @@ public class Birthdays {
         List<String> birthdays1 = extractBirthdaysWithRegex(text);
         for (String bd: birthdays1){
             LocalDate date = convertToLocalDate(bd);
-            System.out.println(date);
         }
     }
     public static List<String> extractBirthdaysWithRegex(String text) {
