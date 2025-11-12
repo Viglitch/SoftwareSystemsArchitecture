@@ -4,7 +4,6 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
 
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,7 +16,9 @@ public class Bot {
         DatabaseManager dbManager = new DatabaseManager();
         dbManager.createUsersTable(url, username, password);
 
-        dbManager.createUsersTable(url, username, password);
+        String res = dbManager.getAllUsers();
+        Birthdays bd = new Birthdays();
+        bd.initiate(res);
 
         bot.setUpdatesListener(updates -> {
             for (Update update: updates) {
@@ -26,15 +27,16 @@ public class Bot {
                     String messageText = update.message().text();
                     String userName = update.message().chat().firstName();
 
-                    sendMessage(bot, chatId, "Привет, " + userName + "!\n"
+                    if (messageText.equals("/start")) {
+                        sendMessage(bot, chatId, "Привет, " + userName + "!\n"
                                 + "Я ваш бот и я умею поздравлять с днем рождения.\n"
                                 + "Как мной пользоваться:\n"
                                 + "/newBirthday - добавить день рождения в базу\n"
                                 + "/allBirthdays - посмотреть все дни рождения в базе\n"
                                 + "/deleteBirthday - удалить день рождения из базы\n");
-
-
-                    handleCommand(bot, chatId, messageText, dbManager);
+                    } else {
+                        handleCommand(bot, chatId, messageText, dbManager);
+                    }
                 }
             }
             return UpdatesListener.CONFIRMED_UPDATES_ALL;
@@ -56,17 +58,25 @@ public class Bot {
                     String name = tempNames.get(chatId);
                     String date = command;
 
-                    dbManager.addUser(chatId, name, date);
-                    sendMessage(bot, chatId, "Поздравлю " + name + " в " + date);
+                    if (isValidDate(date)) {
+                        dbManager.addUser(chatId, name, date);
+                        sendMessage(bot, chatId, "Поздравлю " + name + " в " + date);
+                    } else {
+                        sendMessage(bot, chatId, "Неверный формат даты. Используйте DD.MM.YYYY");
+                    }
+
+                    userStates.remove(chatId);
+                    tempNames.remove(chatId);
                     return;
-                    break;
 
                 case "WAITING_FOR_ID_TO_DELETE":
-                    String name = tempNames.get(chatId);
-                    String date = command;
+                    Integer id = Integer.parseInt(command);
 
-                    dbManager.addUser(chatId, name, date);
-                    sendMessage(bot, chatId, "Поздравлю " + name + " в " + date);
+                    dbManager.deleteUser(id);
+                    sendMessage(bot, chatId, "Пользователь " + id + "удален из базы.");
+
+                    userStates.remove(chatId);
+                    tempNames.remove(chatId);
                     return;
             }
         }
@@ -83,17 +93,22 @@ public class Bot {
                 break;
 
             case "/deleteBirthday":
+                userStates.put(chatId, "WAITING_FOR_ID_TO_DELETE");
                 String res2del = dbManager.getAllUsers();
                 sendMessage(bot, chatId, res2del);
-                sendMessage(bot, chatId, "Напиши ID пользователя, которого мы удаляем");
+                sendMessage(bot, chatId, "Напишите id пользователя, которого хотите удалить");
                 break;
 
             default:
-                if (userState == null && command.startsWith("/")) {
+                if (command.startsWith("/")) {
                     sendMessage(bot, chatId, "Неизвестная команда: " + command);
                 }
                 break;
         }
+    }
+
+    private static boolean isValidDate(String date) {
+        return date.matches("\\d{2}\\.\\d{2}\\.\\d{4}");
     }
 
     private static void sendMessage(TelegramBot bot, Long chatId, String text) {

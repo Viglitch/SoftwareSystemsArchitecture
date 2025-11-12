@@ -1,0 +1,34 @@
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class Birthdays {
+    public static void initiate(String args) {
+        String res = args;
+        String text = res;
+
+        List<String> birthdays1 = extractBirthdaysWithRegex(text);
+        for (String bd: birthdays1){
+            LocalDate date = convertToLocalDate(bd);
+            System.out.println(date);
+        }
+    }
+    public static List<String> extractBirthdaysWithRegex(String text) {
+        List<String> birthdays = new ArrayList<>();
+        Pattern pattern = Pattern.compile("🎂 День рождения: (\\d{2}\\.\\d{2}\\.\\d{4})");
+        Matcher matcher = pattern.matcher(text);
+
+        while (matcher.find()) {
+            birthdays.add(matcher.group(1));
+        }
+        return birthdays;
+    }
+
+    public static LocalDate convertToLocalDate(String dateString) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        return LocalDate.parse(dateString, formatter);
+    }
+}

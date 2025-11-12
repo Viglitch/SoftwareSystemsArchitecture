@@ -15,24 +15,29 @@ public class DatabaseManager {
         USER = user;
         PASSWORD = password;
 
-        String sql = "CREATE TABLE IF NOT EXISTS users (" +
+        String createTableSql = "CREATE TABLE IF NOT EXISTS users (" +
                 "id SERIAL PRIMARY KEY, " +
-                "chat_id BIGINT UNIQUE NOT NULL, " +
+                "chat_id BIGINT NOT NULL, " +
                 "username VARCHAR(255), " +
                 "birthdate VARCHAR(255), " +
                 "registered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)";
 
         try (Connection conn = connect();
              Statement stmt = conn.createStatement()) {
-            stmt.execute(sql);
+
+            stmt.execute(createTableSql);
+            System.out.println("Таблица users создана или уже существует");
+
         } catch (SQLException e) {
             System.out.println("Ошибка при создании таблицы: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     public void addUser(Long chatId, String username, String birthdate) {
-        String sql = "INSERT INTO users (chat_id, username, birthdate) " +
-                "VALUES (?, ?, ?) ON CONFLICT (chat_id) DO NOTHING";
+        ensureTableExists();
+
+        String sql = "INSERT INTO users (chat_id, username, birthdate) VALUES (?, ?, ?)";
 
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -42,41 +47,63 @@ public class DatabaseManager {
             pstmt.setString(3, birthdate);
 
             pstmt.executeUpdate();
+            System.out.println("Пользователь добавлен: chatId=" + chatId + ", name=" + username + ", date=" + birthdate);
         } catch (SQLException e) {
             System.out.println("Ошибка при добавлении пользователя: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
+    public void deleteUser(Integer Id) {
+        String sql = "DELETE FROM users WHERE id = ?";
+
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setLong(1, Id);
+            int affectedRows = pstmt.executeUpdate();
+
+            if (affectedRows > 0) {
+                System.out.println("Пользователь с chat_id " + Id + " удален");
+            } else {
+                System.out.println("Пользователь с chat_id " + Id + " не найден");
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Ошибка при удалении пользователя: " + e.getMessage());
+        }
+    }
 
     public String getAllUsers() {
+        ensureTableExists();
+
         StringBuilder result = new StringBuilder();
-        String sql = "SELECT chat_id, username, birthdate, registered_at FROM users ORDER BY registered_at DESC";
+        String sql = "SELECT id, chat_id, username, birthdate, registered_at FROM users ORDER BY registered_at DESC";
 
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
 
-            result.append("📊 Список всех пользователей:\n\n");
+            result.append("📊 Список всех дней рождения:\n\n");
 
             int count = 0;
             while (rs.next()) {
                 count++;
-                Long chatId = rs.getLong("chat_id");
+                int id = rs.getInt("id");
                 String username = rs.getString("username");
                 String birthdate = rs.getString("birthdate");
                 Timestamp registeredAt = rs.getTimestamp("registered_at");
 
-                // Форматируем дату регистрации
                 String regDate = new SimpleDateFormat("dd.MM.yyyy HH:mm").format(registeredAt);
 
                 result.append(String.format(
-                        "👤 Пользователь #%d\n" +
-                                "🆔 ID: %d\n" +
-                                "📛 Username: @%s\n" +
+                        "👤 Запись #%d\n" +
+                                "🆔 ID записи: %d\n" +
+                                "📛 Имя: %s\n" +
                                 "🎂 День рождения: %s\n" +
-                                "📅 Зарегистрирован: %s\n\n",
+                                "📅 Добавлено: %s\n\n",
                         count,
-                        chatId,
+                        id,
                         username != null ? username : "не указан",
                         birthdate != null ? birthdate : "не указана",
                         regDate
@@ -84,32 +111,31 @@ public class DatabaseManager {
             }
 
             if (count == 0) {
-                result.append("❌ В базе данных пока нет пользователей");
+                result.append("❌ В базе данных пока нет записей о днях рождения");
             } else {
-                result.append("Всего пользователей: ").append(count);
+                result.append("Всего записей: ").append(count);
             }
 
         } catch (SQLException e) {
-            result.setLength(0); // Очищаем StringBuilder
+            result.setLength(0);
             result.append("Ошибка при получении пользователей: ").append(e.getMessage());
+            e.printStackTrace();
         }
 
         return result.toString();
     }
 
-    public boolean userExists(Long chatId) {
-        String sql = "SELECT 1 FROM users WHERE chat_id = ?";
 
+    private void ensureTableExists() {
         try (Connection conn = connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             Statement stmt = conn.createStatement()) {
 
-            pstmt.setLong(1, chatId);
-            ResultSet rs = pstmt.executeQuery();
+            String checkSql = "SELECT 1 FROM users LIMIT 1";
+            stmt.executeQuery(checkSql);
 
-            return rs.next();
         } catch (SQLException e) {
-            System.out.println("Ошибка при проверке пользователя: " + e.getMessage());
-            return false;
+            System.out.println("Таблица users не существует, создаем...");
+            createUsersTable(URL, USER, PASSWORD);
         }
     }
 }

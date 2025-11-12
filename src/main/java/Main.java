@@ -6,6 +6,6 @@ public class Main {
         String password = args[3];
         Bot.start(token, url, username, password);
 
-        System.out.println("Бот запущен..." + token + url + username + password);
+        System.out.println("Бот запущен...");
     }
 }
